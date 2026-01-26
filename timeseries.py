@@ -32,9 +32,7 @@ def forecast_monthly_crime(
         Path where forecast parquet was saved.
     """
 
-    # ------------------------------------------------------------------
     # Aggregate to citywide monthly totals
-    # ------------------------------------------------------------------
 
     history_df = (
         monthly_df
@@ -47,9 +45,7 @@ def forecast_monthly_crime(
 
     ts = history_df.set_index("month")["crime_count"]
 
-    # ------------------------------------------------------------------
     # Fit SARIMA
-    # ------------------------------------------------------------------
 
     model = SARIMAX(
         ts,
@@ -60,9 +56,7 @@ def forecast_monthly_crime(
     )
     res = model.fit(disp=False)
 
-    # ------------------------------------------------------------------
     # Forecast
-    # ------------------------------------------------------------------
 
     forecast_res = res.get_forecast(steps=horizon)
     forecast_df = forecast_res.summary_frame()
@@ -74,11 +68,10 @@ def forecast_monthly_crime(
         [["month", "forecast"]]
     )
 
-    # ------------------------------------------------------------------
     # Save forecast
-    # ------------------------------------------------------------------
 
     FORECAST_FILE.parent.mkdir(parents=True, exist_ok=True)
     forecast_df.to_parquet(FORECAST_FILE)
+
 
     return history_df, forecast_df, FORECAST_FILE
