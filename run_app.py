@@ -28,10 +28,7 @@ def extract_crime_types(model_file=MODEL_FILE):
     crime_types = [c.replace("crime_", "").upper() for c in crime_cols]
     return sorted(crime_types)
 
-
-# ---------------------------------------------------------------------
 # Initialise app
-# ---------------------------------------------------------------------
 
 crime_types = extract_crime_types()
 
@@ -48,14 +45,12 @@ app.layout = lambda: build_layout(crime_types)
 # Register callbacks
 register_callbacks(app)
 
-
-# ---------------------------------------------------------------------
 # Run server
-# ---------------------------------------------------------------------
 
 if __name__ == "__main__":
     app.run(
         debug=True,
         host="127.0.0.1",
         port=8050,
+
     )
