@@ -12,10 +12,7 @@ try:
 except Exception:
     MGWR_AVAILABLE = False
 
-
-# ---------------------------------------------------------------------
 # Random Forest
-# ---------------------------------------------------------------------
 
 def fit_rf(features_gdf: pd.DataFrame):
     """
@@ -54,10 +51,7 @@ def fit_rf(features_gdf: pd.DataFrame):
     print("Random Forest fitted.")
     return rf, features_gdf
 
-
-# ---------------------------------------------------------------------
 # GWR (for modest grid sizes)
-# ---------------------------------------------------------------------
 
 def fit_gwr(features_gdf):
     """
@@ -105,10 +99,7 @@ def fit_gwr(features_gdf):
     print("GWR model fitted successfully.")
     return gwr_model, features_gdf
 
-
-# ---------------------------------------------------------------------
 # Local Linear fallback (for large grids)
-# ---------------------------------------------------------------------
 
 def fit_local_linear(features_gdf, k: int = 40):
     """
@@ -151,4 +142,5 @@ def fit_local_linear(features_gdf, k: int = 40):
     features_gdf["pred_gwr"] = features_gdf["pred_llm"]
 
     print("Local Linear model fitted as GWR fallback.")
+
     return features_gdf
