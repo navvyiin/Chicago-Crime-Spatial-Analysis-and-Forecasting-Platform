@@ -13,9 +13,7 @@ def generate_pdf_summary(features_gdf, moran, path=None):
     c = canvas.Canvas(str(path), pagesize=A4)
     width, height = A4
 
-    # ------------------------------------------------------------------
     # Header
-    # ------------------------------------------------------------------
 
     c.setFont("Helvetica-Bold", 16)
     c.drawString(50, height - 50, "Chicago Crime Risk Summary")
@@ -27,9 +25,7 @@ def generate_pdf_summary(features_gdf, moran, path=None):
         f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
     )
 
-    # ------------------------------------------------------------------
     # Summary statistics
-    # ------------------------------------------------------------------
 
     crime = features_gdf["crime_count_total"]
 
@@ -63,10 +59,9 @@ def generate_pdf_summary(features_gdf, moran, path=None):
         f"Moran's I: {moran.I:.4f} (p = {moran.p_norm:.4f})",
     )
 
-    # ------------------------------------------------------------------
     # Footer
-    # ------------------------------------------------------------------
 
     c.showPage()
     c.save()
+
     return path
