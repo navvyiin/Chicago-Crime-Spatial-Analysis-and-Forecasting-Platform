@@ -9,9 +9,7 @@ from .config import (
     DEFAULT_CRS,
 )
 
-# ---------------------------------------------------------------------
 # Chunked crime data loader (critical for large CSVs)
-# ---------------------------------------------------------------------
 
 def iter_crime_chunks(chunksize: int = 500_000):
     """
@@ -58,10 +56,7 @@ def iter_crime_chunks(chunksize: int = 500_000):
 
         yield gdf
 
-
-# ---------------------------------------------------------------------
 # Optional small-data loader (do NOT use for full CSV)
-# ---------------------------------------------------------------------
 
 def load_crimes(primary_types=None):
     """
@@ -95,10 +90,7 @@ def load_crimes(primary_types=None):
 
     return gdf
 
-
-# ---------------------------------------------------------------------
 # Streetlights
-# ---------------------------------------------------------------------
 
 def load_streetlights():
     df = pd.read_csv(
@@ -116,10 +108,7 @@ def load_streetlights():
 
     return gdf.to_crs(epsg=DEFAULT_CRS)
 
-
-# ---------------------------------------------------------------------
 # Bus stops
-# ---------------------------------------------------------------------
 
 def load_bus_stops():
     gdf = gpd.read_file(CTA_BUS_SHP)
@@ -129,11 +118,9 @@ def load_bus_stops():
 
     return gdf.to_crs(epsg=DEFAULT_CRS)
 
-
-# ---------------------------------------------------------------------
 # City boundary
-# ---------------------------------------------------------------------
 
 def load_boundary():
     gdf = gpd.read_file(CITY_LIMITS_SHP)
+
     return gdf.to_crs(epsg=DEFAULT_CRS)
