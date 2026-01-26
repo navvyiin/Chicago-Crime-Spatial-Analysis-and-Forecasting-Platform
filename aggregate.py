@@ -11,10 +11,7 @@ from .config import GRID_FILE, FEATURES_FILE, MONTHLY_FILE
 
 DEFAULT_CRIME_TYPES = ["BURGLARY", "ROBBERY", "ASSAULT"]
 
-
-# ---------------------------------------------------------------------
 # Helper: count point features per grid cell
-# ---------------------------------------------------------------------
 
 def count_points(points_gdf, grid_gdf):
     """
@@ -28,10 +25,7 @@ def count_points(points_gdf, grid_gdf):
     )
     return joined.groupby("cell_id").size()
 
-
-# ---------------------------------------------------------------------
 # Main aggregation routine
-# ---------------------------------------------------------------------
 
 def aggregate_features(primary_types=None, chunksize: int = 500_000):
     """
@@ -41,10 +35,8 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
     """
     if primary_types is None:
         primary_types = DEFAULT_CRIME_TYPES
-
-    # ------------------------------------------------------------------
+        
     # Load grid
-    # ------------------------------------------------------------------
 
     grid = gpd.read_file(GRID_FILE)
     grid = gpd.GeoDataFrame(grid, geometry="geometry")
@@ -56,18 +48,14 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
     print("[AGGREGATE DEBUG] Rows:", len(grid))
     print("[AGGREGATE DEBUG] CRS:", grid.crs)
 
-    # ------------------------------------------------------------------
     # Initialise counters
-    # ------------------------------------------------------------------
 
     grid["crime_count_total"] = 0
     for ctype in primary_types:
         grid[f"crime_{ctype.lower()}"] = 0
 
-    # ------------------------------------------------------------------
     # Load environmental context (small datasets)
-    # ------------------------------------------------------------------
-
+    
     lights = load_streetlights()
     bus = load_bus_stops()
 
@@ -85,9 +73,7 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
         .astype(int)
     )
 
-    # ------------------------------------------------------------------
     # Chunked crime aggregation
-    # ------------------------------------------------------------------
 
     monthly_records = []
 
@@ -131,9 +117,7 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
 
         monthly_records.append(monthly_chunk)
 
-    # ------------------------------------------------------------------
     # Combine monthly data
-    # ------------------------------------------------------------------
 
     if monthly_records:
         monthly = pd.concat(monthly_records, ignore_index=True)
@@ -142,9 +126,7 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
             columns=["cell_id", "month", "hour", "dow", "primary_type", "crime_count"]
         )
 
-    # ------------------------------------------------------------------
     # Save outputs
-    # ------------------------------------------------------------------
 
     FEATURES_FILE.parent.mkdir(parents=True, exist_ok=True)
     grid.to_parquet(FEATURES_FILE)
@@ -155,5 +137,6 @@ def aggregate_features(primary_types=None, chunksize: int = 500_000):
     print("\n[AGGREGATE] Aggregation complete.")
     print(f"[AGGREGATE] Saved features to: {FEATURES_FILE}")
     print(f"[AGGREGATE] Saved monthly table to: {MONTHLY_FILE}")
+
 
     return grid, monthly, primary_types
