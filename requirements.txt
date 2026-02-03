@@ -1,41 +1,36 @@
-# Core scientific stack
-numpy>=1.23,<2.0
-pandas>=1.5,<2.2
-scipy>=1.10,<1.12
+# ---- Core numeric stack ----
+numpy==1.26.4
+pandas==2.1.4
+scipy==1.11.4
 
-# Geospatial stack (Shapely 2.x compatible)
-geopandas>=0.13,<0.15
-shapely>=2.0,<2.1
-pyproj>=3.5,<3.7
-fiona>=1.9,<1.10
-pyogrio>=0.7,<0.9
-rtree>=1.0
+# ---- Geospatial stack (stable combo) ----
+shapely==2.0.4
+pyproj==3.6.1
+fiona==1.9.6
+pyogrio==0.8.0
+rtree==1.2.0
+geopandas==0.14.3
 
-# Spatial statistics
-libpysal>=4.7,<4.10
-esda>=2.4,<2.6
+# ---- Spatial statistics ----
+libpysal==4.9.2
+esda==2.5.1
+mgwr==2.1.2
 
-# GWR modelling (optional but supported)
-mgwr>=2.1.2,<2.2
+# ---- ML / stats ----
+scikit-learn==1.3.2
+statsmodels==0.14.1
+pyarrow==14.0.2
 
-# Machine learning & statistical modelling
-scikit-learn>=1.2,<1.5
-statsmodels>=0.14,<0.15
-pyarrow>=14.0
+# ---- Dash stack ----
+dash==2.14.2
+dash-bootstrap-components==1.6.0
+plotly==5.18.0
 
-# Dashboard & visualisation
-dash>=2.11,<3.0
-dash-bootstrap-components>=1.5,<2.0
-plotly>=5.17,<6.0
+# ---- Reporting / plotting ----
+reportlab==3.6.13
+matplotlib==3.8.2
+seaborn==0.13.2
 
-# PDF reporting
-reportlab>=3.6,<4.0
-
-# Optional / development utilities
-matplotlib>=3.7,<3.9
-
-# Optional
-seaborn>=0.13
-contextily>=1.3
-splot>=1.1
-
+# ---- Optional geo viz ----
+contextily==1.5.0
+splot==1.1.5
