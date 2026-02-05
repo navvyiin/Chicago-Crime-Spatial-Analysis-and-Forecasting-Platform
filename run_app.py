@@ -47,15 +47,3 @@ app.layout = lambda: build_layout(crime_types)
 
 # Register callbacks
 register_callbacks(app)
-
-
-# ---------------------------------------------------------------------
-# Run server
-# ---------------------------------------------------------------------
-
-if __name__ == "__main__":
-    app.run(
-        debug=True,
-        host="127.0.0.1",
-        port=8050,
-    )
