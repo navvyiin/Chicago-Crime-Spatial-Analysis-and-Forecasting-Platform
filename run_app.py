@@ -13,9 +13,12 @@ def extract_crime_types(model_file=MODEL_FILE):
     from aggregated crime_* columns.
     """
     if not model_file.exists():
-        raise FileNotFoundError(
-            f"Model file not found: {model_file}. "
-            "Run run_pipeline.py first."
+        raise RuntimeError(
+            "Required model artefact not found:\n"
+            f"  {model_file}\n\n"
+            "This application expects precomputed model outputs.\n"
+            "Run run_pipeline.py locally and commit the resulting\n"
+            "data/processed/model_results.parquet file."
         )
 
     gdf = gpd.read_parquet(model_file)
@@ -25,12 +28,18 @@ def extract_crime_types(model_file=MODEL_FILE):
         if c.startswith("crime_") and c != "crime_count_total"
     ]
 
+    if not crime_cols:
+        raise RuntimeError(
+            "Model file loaded successfully, but no crime_* columns were found.\n"
+            "Check that the pipeline completed correctly."
+        )
+
     crime_types = [c.replace("crime_", "").upper() for c in crime_cols]
     return sorted(crime_types)
 
 
 # ---------------------------------------------------------------------
-# Initialise app
+# Initialise app (import-safe for Gunicorn)
 # ---------------------------------------------------------------------
 
 crime_types = extract_crime_types()
@@ -47,3 +56,9 @@ app.layout = lambda: build_layout(crime_types)
 
 # Register callbacks
 register_callbacks(app)
+
+# ---------------------------------------------------------------------
+# NOTE:
+# No app.run() here.
+# Gunicorn is responsible for serving the app in production.
+# ---------------------------------------------------------------------
