@@ -19,6 +19,10 @@ elif "gi_z" not in gdf.columns:
 if "kde_intensity" not in gdf.columns:
     gdf["kde_intensity"] = np.nan
 
+# Interval width for uncertainty maps
+if "pred_lower" in gdf.columns and "pred_upper" in gdf.columns:
+    gdf["pred_interval_width"] = gdf["pred_upper"] - gdf["pred_lower"]
+
 # Load monthly table
 
 try:
@@ -41,15 +45,16 @@ def make_static_map(model_choice, color_scale, crime_type, hour=None, dows=None)
     # Select value column
     if model_choice == "observed":
         value_col = get_observed_column(crime_type)
-
     elif model_choice == "hotspot":
         value_col = "gi_star"
-
     elif model_choice == "kde":
         value_col = "kde_intensity"
-
+    elif model_choice == "risk":
+        value_col = "risk_score"
+    elif model_choice == "uncertainty":
+        value_col = "pred_interval_width"
     else:
-        # pred_poisson / pred_nb / pred_rf / pred_gwr
+        # pred_poisson / pred_nb / pred_rf / pred_gwr / pred_gb
         value_col = model_choice
 
     df["value"] = df[value_col]
@@ -64,7 +69,11 @@ def make_static_map(model_choice, color_scale, crime_type, hour=None, dows=None)
         "pred_poisson": True,
         "pred_nb": True,
         "pred_rf": True,
+        "pred_gb": True,
         "pred_gwr": True,
+        "risk_score": True,
+        "risk_quantile": True,
+        "priority_rank": True,
         "gi_star": True,
         "kde_intensity": True,
     }
