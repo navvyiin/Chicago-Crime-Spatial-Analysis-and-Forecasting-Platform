@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.neighbors import NearestNeighbors
 from sklearn.linear_model import LinearRegression
 
@@ -14,7 +14,7 @@ except Exception:
 
 
 # ---------------------------------------------------------------------
-# Random Forest
+# Random Forest / Gradient Boosting
 # ---------------------------------------------------------------------
 
 def fit_rf(features_gdf: pd.DataFrame):
@@ -53,6 +53,44 @@ def fit_rf(features_gdf: pd.DataFrame):
 
     print("Random Forest fitted.")
     return rf, features_gdf
+
+
+def fit_gb(features_gdf: pd.DataFrame):
+    """
+    Fit a Gradient Boosting model to predict crime_count_total from
+    the same environmental and crime-type features as Random Forest.
+    """
+    df = features_gdf.copy()
+    df = df[df["crime_count_total"].notna()]
+
+    candidate_cols = [
+        "streetlight_count",
+        "bus_count",
+        "crime_burglary",
+        "crime_robbery",
+        "crime_assault",
+    ]
+    X_cols = [c for c in candidate_cols if c in df.columns]
+
+    if not X_cols:
+        raise ValueError("No predictor columns available for Gradient Boosting.")
+
+    X = df[X_cols].values
+    y = df["crime_count_total"].values
+
+    gb = GradientBoostingRegressor(
+        n_estimators=300,
+        max_depth=3,
+        learning_rate=0.05,
+        random_state=42,
+    )
+    gb.fit(X, y)
+
+    preds = gb.predict(features_gdf[X_cols].fillna(0).values)
+    features_gdf["pred_gb"] = preds
+
+    print("Gradient Boosting fitted.")
+    return gb, features_gdf
 
 
 # ---------------------------------------------------------------------

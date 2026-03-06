@@ -30,6 +30,8 @@ def forecast_monthly_crime(
         Forecasted monthly totals.
     forecast_path : Path
         Path where forecast parquet was saved.
+    metrics : dict
+        Basic in-sample diagnostics (AIC, BIC, RMSE).
     """
 
     # ------------------------------------------------------------------
@@ -75,10 +77,21 @@ def forecast_monthly_crime(
     )
 
     # ------------------------------------------------------------------
+    # Diagnostics
+    # ------------------------------------------------------------------
+
+    rmse = (res.fittedvalues - ts).pow(2).mean() ** 0.5
+    metrics = {
+        "aic": float(res.aic),
+        "bic": float(res.bic),
+        "rmse_in_sample": float(rmse),
+    }
+
+    # ------------------------------------------------------------------
     # Save forecast
     # ------------------------------------------------------------------
 
     FORECAST_FILE.parent.mkdir(parents=True, exist_ok=True)
     forecast_df.to_parquet(FORECAST_FILE)
 
-    return history_df, forecast_df, FORECAST_FILE
+    return history_df, forecast_df, FORECAST_FILE, metrics
