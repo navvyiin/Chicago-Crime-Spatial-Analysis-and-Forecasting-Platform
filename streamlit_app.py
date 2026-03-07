@@ -4,10 +4,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from app.maps import make_static_map, make_animated_map, gdf, monthly_df
-from src.config import FORECAST_FILE, MODEL_METRICS_FILE
-from src.reporting import generate_pdf_summary
-from src.spatial_stats import compute_moran
+from maps import make_static_map, make_animated_map, gdf, monthly_df
+from config import FORECAST_FILE, MODEL_METRICS_FILE
+from reporting import generate_pdf_summary
+from spatial_stats import compute_moran
 
 
 def _get_crime_types_from_gdf() -> list[str]:
@@ -422,4 +422,5 @@ def _render_scenarios_tab() -> None:
 
 if __name__ == "__main__":
     main()
+
 
