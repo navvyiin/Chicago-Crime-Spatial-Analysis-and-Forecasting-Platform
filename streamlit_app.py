@@ -36,7 +36,7 @@ DAY_LABELS = {
 
 def main() -> None:
     st.set_page_config(
-        page_title="Chicago Environmental Criminology Dashboard",
+        page_title="Chicago Criminology Dashboard",
         page_icon="🛰️",
         layout="wide",
     )
@@ -422,5 +422,6 @@ def _render_scenarios_tab() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
