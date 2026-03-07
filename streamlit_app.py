@@ -73,9 +73,9 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    st.title("Chicago Crime Risk Dashboard — 2025 Analysis")
+    st.title("Chicago Crime Risk Analysis")
     st.caption(
-        "Interactive environmental criminology dashboard for Chicago — explore spatial risk, "
+        "Interactive criminology dashboard for Chicago — explore spatial risk, "
         "hotspots, and forecasts with model-based and observed crime patterns."
     )
 
@@ -422,4 +422,5 @@ def _render_scenarios_tab() -> None:
 
 if __name__ == "__main__":
     main()
+
 
