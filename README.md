@@ -1,406 +1,43 @@
-# CrimeScope
-### A Scalable Geospatial Machine Learning Platform for Urban Crime Intelligence, Spatial Risk Mapping, and Temporal Forecasting
+# Chicago Crime Spatial Analysis & Forecasting Platform
 
-> An end-to-end geospatial analytics framework that transforms more than two decades of urban crime records into interpretable spatial intelligence through statistical modelling, spatial statistics, machine learning, and interactive decision-support tools.
+A geospatial machine learning pipeline for crime risk mapping, hotspot detection, and short-term forecasting in Chicago, built as an independent project.
 
-CrimeScope is an open-source spatial analytics platform designed for large-scale urban crime analysis. The system integrates geospatial data engineering, statistical modelling, spatial autocorrelation analysis, hotspot detection, temporal forecasting, and interactive visualisation into a reproducible computational workflow.
+**Live app:** https://chicago-crime-spatial-analysis-and-forecasting-platform-usng.streamlit.app/
 
-Unlike conventional crime prediction projects that focus on a single machine learning model, CrimeScope treats urban crime as a spatial process. The platform combines classical statistical inference with spatial statistical methods and modern machine learning to produce interpretable crime intelligence suitable for urban planning, public policy, and smart-city applications.
+## What it does
 
----
+Chicago's public crime dataset contains 8M+ recorded incidents (2001–2025). I filtered and spatially joined this down to 46,957 incidents relevant to the study period and aggregated them onto a 500-metre hexagonal grid, combining them with streetlight locations, CTA bus stops, and administrative boundary data.
 
-# Motivation
+From there, the pipeline:
+- Tests spatial dependence with **Moran's I** (I = 0.5063, p < 0.0001 — moderate positive autocorrelation) and identifies local clusters with **Getis-Ord Gi\***
+- Generates smoothed crime intensity surfaces via **kernel density estimation**
+- Models baseline risk with **Poisson and Negative Binomial GLMs**, checking for overdispersion
+- Captures non-linear spatial interactions with a **200+ tree Random Forest** regressor
+- Fits a **Geographically Weighted Regression (GWR)** model, falling back to local linear modeling automatically on grids above 6,000 cells, where GWR becomes computationally impractical
+- Forecasts monthly crime counts with **Exponential Smoothing (ETS)**, degrading gracefully when a given hex cell has too little history to forecast reliably
 
-Urban crime exhibits strong spatial and temporal dependence.
+Results are served through an interactive Streamlit dashboard: observed vs. predicted choropleths, hour-of-day and day-of-week filtering, animated crime maps, and PDF/CSV export.
 
-Traditional predictive models often ignore these relationships by treating crime observations as independent events, leading to biased estimates and misleading predictions.
+## Why hex grids, and why GWR at all
 
-CrimeScope was developed to investigate crime through a spatial perspective by integrating
+Point-level crime data is noisy and doesn't aggregate well for regression. A hexagonal grid gives uniform neighbor adjacency (unlike squares, which have ambiguous diagonal neighbors) and keeps spatial units at a consistent, interpretable scale. GWR was included specifically because global regression assumes the relationship between predictors and crime risk is constant across the city — it isn't; the drivers of risk in a dense downtown grid cell are not the same as in a low-density residential one. The automatic fallback to local linear modeling exists because GWR's computational cost scales roughly with the square of the number of spatial units, which becomes prohibitive above a few thousand cells on a single machine.
 
-- Geospatial data engineering
-- Spatial statistics
-- Statistical modelling
-- Machine learning
-- Time-series forecasting
-- Interactive geovisualisation
+## Tech stack
 
-within a single modular architecture.
+Python, GeoPandas, Shapely, Scikit-learn, Statsmodels, Random Forest, Poisson/NB GLM, GWR, Streamlit, Plotly, ReportLab (PDF export).
 
-The project demonstrates how spatial intelligence can support evidence-based decision making in urban environments while remaining reproducible, extensible, and deployable.
+## Known limitations
 
----
+- Runs on a single machine — no distributed processing, so the grid resolution is capped by available memory.
+- Crime data reflects reported incidents only, which is a known source of bias in any crime-risk model and isn't corrected for here.
+- ETS forecasting is intentionally simple; it wasn't the focus of the project and a more capable time-series model (e.g., incorporating exogenous covariates) would likely outperform it.
 
-# Key Features
-
-## Geospatial Data Engineering
-
-- Processes more than **8 million crime incidents (2001–2025)**
-- Generates scalable hexagonal spatial grids
-- Integrates multiple environmental datasets including
-
-  - Streetlight locations
-  - CTA Bus Stops
-  - Administrative boundaries
-
-- Automated CRS handling and spatial preprocessing
-
----
-
-## Spatial Feature Engineering
-
-- Hexagonal spatial aggregation
-- Density estimation
-- Environmental feature extraction
-- Spatial neighbourhood construction
-- Distance-based feature generation
-
----
-
-## Statistical Modelling
-
-Implements multiple complementary modelling approaches.
-
-### Generalised Linear Models
-
-- Poisson Regression
-- Negative Binomial Regression
-
-for interpretable baseline crime estimation.
-
-### Machine Learning
-
-- Random Forest Regression
-
-captures nonlinear interactions between spatial variables.
-
-### Spatial Regression
-
-- Geographically Weighted Regression (GWR)
-
-models spatially varying relationships across the city.
-
-Automatic fallback methods ensure computational stability for large spatial grids.
-
----
-
-## Spatial Statistics
-
-The platform incorporates established spatial analytical methods including
-
-- Moran's I
-- Local Moran's I
-- Getis–Ord Gi*
-- Kernel Density Estimation (KDE)
-
-to identify clustering, hotspots, and spatial dependence.
-
----
-
-## Temporal Forecasting
-
-Monthly crime trends are forecast using
-
-- Exponential Smoothing (ETS)
-
-allowing temporal analysis alongside spatial prediction.
-
----
-
-## Interactive Decision Support
-
-An interactive Streamlit dashboard provides
-
-- Choropleth crime risk maps
-- Hotspot visualisation
-- KDE intensity surfaces
-- Time filters
-- Animated crime evolution
-- Forecast dashboards
-- PDF reporting
-- CSV export
-
----
-
-# System Architecture
-
-```text
-                Raw Spatial Data
-                       │
-                       ▼
-               Data Validation
-                       │
-                       ▼
-            Spatial Data Engineering
-                       │
-                       ▼
-          Hexagonal Grid Construction
-                       │
-                       ▼
-         Spatial Feature Engineering
-                       │
-      ┌───────────────────────────────────┐
-      │                                   │
-      ▼                                   ▼
-Statistical Models                Spatial Statistics
-(Poisson / NB / RF / GWR)    (Moran's I / Gi* / KDE)
-      │                                   │
-      └──────────────┬────────────────────┘
-                     ▼
-           Time-Series Forecasting
-                     │
-                     ▼
-          Interactive Dashboard
-                     │
-                     ▼
-          Reports & Spatial Outputs
-```
-
----
-
-# Repository Structure
-
-```text
-CrimeScope/
-
-├── app/
-│   └── maps.py
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── docs/
-│   ├── methodology.md
-│   ├── architecture.md
-│   ├── benchmark.md
-│   ├── limitations.md
-│   └── references.md
-│
-├── src/
-│   ├── aggregate.py
-│   ├── build_grid.py
-│   ├── config.py
-│   ├── load_data.py
-│   ├── model_poisson_nb.py
-│   ├── model_rf_gwr.py
-│   ├── spatial_stats.py
-│   ├── timeseries.py
-│   └── reporting.py
-│
-├── assets/
-│   ├── architecture.png
-│   ├── workflow.gif
-│   └── screenshots/
-│
-├── run_pipeline.py
-├── streamlit_app.py
-├── requirements.txt
-└── README.md
-```
-
----
-
-# Methodology
-
-CrimeScope follows a fully reproducible spatial analytics workflow.
-
-1. Import raw spatial datasets.
-2. Validate geometries and coordinate reference systems.
-3. Construct a hexagonal spatial grid covering the study region.
-4. Aggregate crime incidents into spatial units.
-5. Engineer environmental and spatial features.
-6. Fit statistical and machine learning models.
-7. Quantify spatial dependence and hotspot intensity.
-8. Forecast future crime trends.
-9. Generate interactive visualisations and automated reports.
-
----
-
-# Installation
-
-## Requirements
-
-- Python 3.10+
-- GDAL-compatible environment
-- Recommended: Conda or virtual environment
+## Setup
 
 ```bash
-git clone https://github.com/navvyiin/CrimeScope.git
-
-cd CrimeScope
-
-python -m venv crime_env
-
-source crime_env/bin/activate
-
+git clone https://github.com/navvyiin/chicago-crime-spatial-analysis-forecasting-platform.git
+cd chicago-crime-spatial-analysis-forecasting-platform
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-```
-
----
-
-# Running the Pipeline
-
-Execute the complete analytical workflow.
-
-```bash
-python run_pipeline.py
-```
-
-Specify custom spatial resolutions.
-
-```bash
-python run_pipeline.py --hex 100
-```
-
-The pipeline performs
-
-- spatial preprocessing
-- feature engineering
-- statistical modelling
-- hotspot analysis
-- temporal forecasting
-- report generation
-
-without additional user intervention.
-
----
-
-# Launching the Dashboard
-
-```bash
 streamlit run streamlit_app.py
 ```
-
-The dashboard supports interactive exploration of
-
-- observed crime density
-- predicted spatial risk
-- hotspot significance
-- KDE intensity
-- temporal evolution
-- monthly forecasts
-- intervention scenarios
-
----
-
-# Outputs
-
-| Output | Description |
-|----------|-------------|
-| Hexagonal Grid | Spatial analysis units |
-| Feature Matrix | Engineered spatial predictors |
-| Model Predictions | Crime risk estimates |
-| Moran's I | Global spatial autocorrelation |
-| Getis–Ord Gi* | Local hotspot significance |
-| KDE Surfaces | Spatial intensity estimation |
-| Forecasts | Monthly crime projections |
-| PDF Reports | Automated analytical summaries |
-
----
-
-# Engineering Challenges
-
-The primary challenge was not model development but computational scalability.
-
-Spatial statistical techniques such as Geographically Weighted Regression become computationally expensive as the number of spatial units increases. CrimeScope therefore incorporates adaptive modelling strategies that automatically replace computationally intensive algorithms with efficient alternatives while preserving analytical consistency.
-
-Another major challenge involved constructing a reproducible geospatial data engineering pipeline capable of integrating heterogeneous datasets with different coordinate systems, spatial resolutions, and attribute schemas into a unified analytical framework.
-
----
-
-# Design Principles
-
-CrimeScope was developed around several guiding principles.
-
-- Modular software architecture
-- Reproducible spatial workflows
-- Statistical interpretability
-- Computational scalability
-- Interactive visual analytics
-- Extensibility
-- Research transparency
-
----
-
-# Current Limitations
-
-Current limitations include
-
-- Single-machine execution
-- Batch processing only
-- No distributed spatial computation
-- No streaming crime ingestion
-- Limited forecasting models
-- No deep learning spatial architectures
-
-These limitations are intentional design trade-offs prioritising reproducibility and interpretability.
-
----
-
-# Future Work
-
-Future development will explore
-
-- Graph Neural Networks for spatial dependency modelling
-- Transformer-based temporal forecasting
-- Distributed raster and vector computation using Dask
-- PostGIS integration
-- Cloud-native deployment
-- Kubernetes orchestration
-- Real-time streaming analytics
-- Reinforcement learning for intervention planning
-- Multi-city benchmarking
-- Explainable spatial AI
-
----
-
-# Applications
-
-CrimeScope can support research and operational workflows in
-
-- Urban Analytics
-- Smart Cities
-- Public Safety
-- Spatial Epidemiology
-- Environmental Risk Analysis
-- Transportation Planning
-- Emergency Management
-- Geospatial Artificial Intelligence
-
----
-
-# Citation
-
-If you use CrimeScope in academic work, please cite
-
-```text
-Naval Kishore
-
-CrimeScope: A Scalable Geospatial Machine Learning Platform for Urban Crime Intelligence, Spatial Risk Mapping, and Temporal Forecasting.
-
-GitHub Repository, 2026.
-```
-
----
-
-# License
-
-This project is released under the MIT License.
-
----
-
-# Acknowledgements
-
-CrimeScope builds upon the outstanding open-source geospatial and scientific Python ecosystem, including
-
-- GeoPandas
-- Shapely
-- PySAL
-- scikit-learn
-- Statsmodels
-- Streamlit
-- Folium
-- Pandas
-- NumPy
-
-whose contributions make modern computational geography and spatial data science possible.
